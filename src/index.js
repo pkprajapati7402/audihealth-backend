@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+import connectDB from "./db/index.js";
+import dotenv from 'dotenv';
+import { app } from "./app.js";
+>>>>>>> f7f7f903db9c6836e862df269011025a069daf6e
 import mongoose from 'mongoose';
 
 const connectDB = async () => {
