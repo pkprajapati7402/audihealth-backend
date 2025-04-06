@@ -1,14 +1,15 @@
 import connectDB from "./db/index.js";
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
 import { app } from "./app.js";
 import mongoose from 'mongoose';
 
 dotenv.config({
     path: './.env'
-})
+});
 
-connectDB()
-    .then(() => {
+const startServer = async () => {
+    try {
+        await connectDB(); // Ensure MongoDB is connected
         mongoose.connection.on('connected', () => {
             console.log('Mongoose connected to DB');
         });
@@ -17,10 +18,14 @@ connectDB()
             console.error('Mongoose connection error:', err.message);
         });
 
-        app.listen(process.env.PORT, () => {
-            console.log(`Server is running at PORT: ${process.env.PORT}`);
+        const PORT = process.env.PORT || 8000;
+        app.listen(PORT, () => {
+            console.log(`Server is running at PORT: ${PORT}`);
         });
-    })
-    .catch((error) => {
-        console.error("MONGODB CONNECTION FAILED ::", error.message);
-    });
+    } catch (error) {
+        console.error("Failed to start server:", error.message);
+        process.exit(1);
+    }
+};
+
+startServer();
