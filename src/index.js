@@ -1,14 +1,29 @@
-import connectDB from "./db/index.js";
-import dotenv from 'dotenv'
-import { app } from "./app.js";
 import mongoose from 'mongoose';
+
+const connectDB = async () => {
+    try {
+        const connectionInstance = await mongoose.connect(process.env.MONGODB_URI, {
+            serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
+        });
+        console.log(`MONGODB connected :: DB_HOST :: ${connectionInstance.connection.host}`);
+    } catch (error) {
+        console.error("MONGODB CONNECTION FAILED ::", error.message);
+        process.exit(1);
+    }
+};
+
+export default connectDB;
+
+import dotenv from 'dotenv';
+import { app } from "./app.js";
 
 dotenv.config({
     path: './.env'
-})
+});
 
-connectDB()
-    .then(() => {
+const startServer = async () => {
+    try {
+        await connectDB(); // Ensure MongoDB is connected
         mongoose.connection.on('connected', () => {
             console.log('Mongoose connected to DB');
         });
@@ -17,10 +32,14 @@ connectDB()
             console.error('Mongoose connection error:', err.message);
         });
 
-        app.listen(process.env.PORT, () => {
-            console.log(`Server is running at PORT: ${process.env.PORT}`);
+        const PORT = process.env.PORT || 8000;
+        app.listen(PORT, () => {
+            console.log(`Server is running at PORT: ${PORT}`);
         });
-    })
-    .catch((error) => {
-        console.error("MONGODB CONNECTION FAILED ::", error.message);
-    });
+    } catch (error) {
+        console.error("Failed to start server:", error.message);
+        process.exit(1);
+    }
+};
+
+startServer();

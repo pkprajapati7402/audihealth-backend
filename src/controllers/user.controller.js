@@ -21,49 +21,35 @@ const generateAccessAndRefreshTokens = async (userId) => {
 export const registerUser = asyncHandler(async (req, res) => {
     const { email, username, fullName, password } = req.body;
 
-    if ([email, username, fullName, password].some((field) => !field?.trim())) {
+    // Validate required fields
+    if (!email || !username || !fullName || !password) {
         return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
     try {
-        const existingUser = await User.findOne({
-            $or: [{ email }, { username }]
-        });
-
+        // Check if user already exists
+        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
         if (existingUser) {
-            return res.status(409).json({
-                success: false,
-                message: "User with email or username already exists"
-            });
+            return res.status(409).json({ success: false, message: "User already exists" });
         }
 
+        // Create new user
         const user = await User.create({
             fullName,
             email: email.toLowerCase(),
             username: username.toLowerCase(),
-            password
+            password,
         });
 
         const createdUser = await User.findById(user._id).select("-password -refreshToken");
-
-        if (!createdUser) {
-            return res.status(500).json({
-                success: false,
-                message: "Something went wrong while registering the user"
-            });
-        }
-
         return res.status(201).json({
             success: true,
             message: "User registered successfully",
-            user: createdUser
+            user: createdUser,
         });
     } catch (error) {
         console.error("Error during user registration:", error.message);
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 });
 

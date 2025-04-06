@@ -19,7 +19,7 @@ app.use(cors({
     },
     credentials: true, // Allow cookies and credentials
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // Middleware
@@ -40,6 +40,15 @@ app.use('/api/chat', aiModelRouter);
 app.use('/api/reports', reportRouter);
 app.use('/api/exercises', exerciseRoutes);
 app.use('/api/doctors', doctorRoutes);
+
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+    console.error("Unhandled error:", err.message);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || "Internal Server Error",
+    });
+});
 
 // Start the Server
 const PORT = process.env.PORT || 8000; // Use Render's assigned port or default to 8000
