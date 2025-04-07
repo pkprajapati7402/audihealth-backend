@@ -117,7 +117,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     if (!incomingRefreshToken) {
         return res.status(401).json({
             success: false,
-            message: "Unauthorized request - No refresh token"
+            message: "Unauthorized request - No refresh token",
         });
     }
 
@@ -128,7 +128,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
         if (!user || incomingRefreshToken !== user?.refreshToken) {
             return res.status(401).json({
                 success: false,
-                message: "Invalid refresh token"
+                message: "Invalid refresh token",
             });
         }
 
@@ -139,23 +139,23 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
             .cookie("accessToken", accessToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: 'None'
+                sameSite: "None",
             })
             .cookie("refreshToken", refreshToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: 'None'
+                sameSite: "None",
             })
             .json({
                 success: true,
                 accessToken,
                 user,
-                message: "Access token refreshed"
+                message: "Access token refreshed",
             });
     } catch (error) {
         return res.status(401).json({
             success: false,
-            message: "Invalid refresh token"
+            message: "Invalid refresh token",
         });
     }
-};
+});
