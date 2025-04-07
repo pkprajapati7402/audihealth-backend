@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { db } from "../firebase.js";
+import { collection, doc, getDoc, setDoc, query, where, getDocs } from "firebase/firestore";
 
 const userSchema = new mongoose.Schema(
     {
@@ -74,5 +76,25 @@ userSchema.methods.generateRefreshToken = function() {
         }
     )
 }
+
+const usersCollection = collection(db, "users");
+
+export const createUser = async (userData) => {
+    const userDoc = doc(usersCollection, userData.email);
+    await setDoc(userDoc, userData);
+    return userData;
+};
+
+export const findUserByEmail = async (email) => {
+    const userDoc = doc(usersCollection, email);
+    const userSnapshot = await getDoc(userDoc);
+    return userSnapshot.exists() ? userSnapshot.data() : null;
+};
+
+export const findUserByUsername = async (username) => {
+    const q = query(usersCollection, where("username", "==", username));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.empty ? null : querySnapshot.docs[0].data();
+};
 
 export const User = mongoose.model("User", userSchema);

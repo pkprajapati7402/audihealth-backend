@@ -1,26 +1,18 @@
-import { User } from "../models/user.model.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
-import jwt from "jsonwebtoken"
+import { auth } from "firebase-admin";
 
-export const verifyUserJWT = asyncHandler(async (req, res, next) => {
-    const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+export const verifyUserJWT = async (req, res, next) => {
+    const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
-        return res.status(401).json({ success: false, message: "Unauthorized request" });
+        return res.status(401).json({ message: "Unauthorized" });
     }
 
     try {
-        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
-
-        if (!user) {
-            return res.status(401).json({ success: false, message: "Invalid Access Token" });
-        }
-
-        req.user = user;
+        const decodedToken = await auth().verifyIdToken(token);
+        req.user = decodedToken;
         next();
     } catch (error) {
-        console.error("JWT verification failed:", error.message);
-        return res.status(401).json({ success: false, message: "Invalid Access Token" });
+        console.error("Token verification failed:", error.message);
+        res.status(401).json({ message: "Invalid token" });
     }
-});
+};
