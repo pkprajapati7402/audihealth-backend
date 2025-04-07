@@ -1,4 +1,6 @@
-import { auth } from "firebase-admin";
+import admin from "../firebase-admin.js";
+
+const { auth } = admin;
 
 export const verifyUserJWT = async (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
@@ -8,7 +10,7 @@ export const verifyUserJWT = async (req, res, next) => {
     }
 
     try {
-        const decodedToken = await auth().verifyIdToken(token);
+        const decodedToken = await auth.verifyIdToken(token);
         req.user = decodedToken;
         next();
     } catch (error) {
